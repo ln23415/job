@@ -24,6 +24,91 @@ public class Sort {
 	}
 	
 	
+	
+    /*
+     * 
+     * 把输入的数组分成两份，要是输入的数组长度是1就不用分了，随后递归调用merge(merge_sort(left_arr), merge_sort(right_arr));
+     * 这样的递归调用会使每次传入merge函数的两个arr各自都是排好序的。
+     * 
+     */
+	public static int[] merge_sort(int[] arr){
+		if (arr.length<2) {
+				return arr;
+			}
+		int middle = arr.length / 2;
+		int left_arr[] = Arrays.copyOfRange(arr, 0, middle);
+		int right_arr[] = Arrays.copyOfRange(arr, middle, arr.length);
+
+		return merge(merge_sort(left_arr), merge_sort(right_arr));
+    }
+    
+    /*
+     * 
+     * merge 函数的作用是把两个已经各自排好序arr排序后合在一起，所以先声明一个result数组用于 返回，长度是两个arr长度的和，
+     * idx指针指向result的第一个元素，随后一起逐元素遍历两个arr数组，遍历的方式是对比两个数组的第一个元素，取最小元素的出栈，该放入result的元素，
+     * 出栈的方式使用Arrays.copyOfRange(arr, 1, arr.length)的方式，相当于移除了刚才出栈的元素，方便下次判断。倘若两个arr中任一一个元素全部
+     * 出栈了，那就把另一个arr的值全部放到result剩余空间里就好了。放的方式依旧是Arrays.copyOfRange(arr, 1, arr.length)，从左到右一个个放。
+     * 
+     */
+	public static int[] merge(int[] left_arr, int[] right_arr) {
+		int[] result = new int[left_arr.length + right_arr.length];
+		int idx = 0;
+		while (left_arr.length > 0 && right_arr.length > 0) {
+			if(left_arr[0] > right_arr[0]) {
+				result[idx++] = right_arr[0];
+				right_arr = Arrays.copyOfRange(right_arr, 1, right_arr.length);
+			}else {
+				result[idx++] = left_arr[0];
+				left_arr = Arrays.copyOfRange(left_arr, 1, left_arr.length);
+			}
+		}
+		
+		while(left_arr.length > 0) {
+			result[idx++] = left_arr[0];
+			left_arr = Arrays.copyOfRange(left_arr, 1, left_arr.length);
+		}
+		while(right_arr.length > 0) {
+			result[idx++] = right_arr[0];
+			right_arr = Arrays.copyOfRange(right_arr, 1, right_arr.length);
+		}
+		return result;
+	}	
+		
+	
+	public static int[] quick_sort(int[] arr, int left, int right) {
+		if (right <= left) {	
+	//    		System.out.print(left);
+	//    		System.out.print("  ");
+	//    		System.out.print(right);
+	//    		System.out.print("  ");
+	//    		System.out.println(Arrays.toString(arr));
+				return arr;
+			}
+
+		int i =  left;
+		int j = right + 1;	// j = right + 1的原因：要执行++i，--j的操作, i++会先返回i,然后i+1。 ++i会直接返回i+1
+		// 用++i而不是i++的好处就是i先增加或减少，在判断，如果不成立i指向的就是不成立的元素
+		// 而i++如果不成立那i指向的是当前位置前一个元素。
+		int anchor_value = arr[left];	// 将anchor设为left索引对应的元素
+		while(true) {
+			while(is_less(arr[++i], anchor_value) && i<right); // i指针从left处右移，找到比anchor大的数，用i指向它。从left右移因为不用判断left，left是anchor。
+			while(is_less(anchor_value, arr[--j]) && j>left);  // j指针从right+1处左移，找到比anchor小的数，用j指向它。 从j+1往左移因为使用了--j，得判断right所以对应的数。
+			if(i >= j)
+				break;
+			swap(arr, i, j); // 交换i和j对应的数，把小于anchor的移到左边，大于anchor的移到右边。
+			// 如果此时i，j相遇了，该交换的都交换完了，没有需要交换的了，则继续走一下循环，i不用管，j左移一定指向了一个比anchor小的数，
+			// 并且因为此时i一定是大于等于j的，于是break推出循环。执行swap(arr, left, j);则换了后anchor左边的元素一定给都小于anchor，右边的元素都大于anchor。
+		}
+			swap(arr, left, j);
+
+		int sep_idx  = j; // j当前指向的就是刚刚的anchor，于是从anchor作为界限点把数组分成两份，循环操作。
+		quick_sort(arr, left, sep_idx-1);
+		quick_sort(arr, sep_idx+1, right);
+		return arr;
+    	
+	}
+	
+	
 	// 插入排序
 	// 从数组的第二个元素开始，持续与##前一个##元素判断，如果当前元素比前一个小，就与前一个元素对调位置
 	// 直到把元素移到正确的位置
